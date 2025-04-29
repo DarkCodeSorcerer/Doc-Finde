@@ -1,0 +1,152 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom"; // Updated import for v6
+
+const UserVaultDashboard = () => {
+  const [vaults, setVaults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();  // Use navigate for redirection in v6
+
+  // Fetch user from local storage
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setUser(storedUser);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user?._id) {
+      axios
+        .get(`http://localhost:5000/api/vaults/user/${user._id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((response) => {
+          setVaults(response.data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching vaults:", error);
+          setLoading(false);
+        });
+    }
+  }, [user]);
+
+  const requestVault = () => {
+    if (!user?._id) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "User is not logged in",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    axios
+      .post(
+        "http://localhost:5000/api/vaults/request",
+        { userId: user._id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        Swal.fire({
+          icon: "success",
+          title: "Request Sent",
+          text: response.data.message,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        setVaults([...vaults, response.data.vault]); // Update UI with new vault
+      })
+      .catch((error) => {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.response?.data?.message || "Something went wrong!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      });
+  };
+
+  // Step 1: Navigate to the Document Management Page when the user clicks "View Vault"
+  const handleViewVault = (vaultId) => {
+    navigate(`/vault/${vaultId}`);  // Use navigate instead of history.push
+  };
+
+  return (
+    <div style={styles.container}>
+      <h2>My Vault</h2>
+      {loading ? (
+        <p>Loading...</p>
+      ) : vaults.length === 0 ? (
+        <button onClick={requestVault} style={styles.requestButton}>
+          Request a Vault
+        </button>
+      ) : (
+        <div>
+          {vaults.map((vault, index) => (
+            <div key={index} style={styles.vaultItem}>
+              {vault.status === "Approved" ? (
+                // Step 2: Show the "View Vault" button for approved vaults
+                <button
+                  onClick={() => handleViewVault(vault._id)}
+                  style={styles.viewButton}
+                >
+                  View Vault
+                </button>
+              ) : (
+                <p>Status: <strong>{vault.status}</strong></p>
+              )}
+              {vault.status === "Denied" && <p>Reason: {vault.reason}</p>}
+              {vault.documents?.length > 0 && (
+                <ul>
+                  {vault.documents.map((doc, i) => (
+                    <li key={i}>{doc}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const styles = {
+  container: { padding: "20px", textAlign: "center" },
+  requestButton: {
+    padding: "10px 20px",
+    background: "#007BFF",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+  },
+  vaultItem: {
+    border: "1px solid #ccc",
+    padding: "10px",
+    margin: "10px auto",
+    maxWidth: "400px",
+    borderRadius: "5px",
+  },
+  viewButton: {
+    padding: "10px 20px",
+    background: "#28a745",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+  },
+};
+
+export default UserVaultDashboard;

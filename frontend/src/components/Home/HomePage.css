@@ -1,0 +1,45 @@
+/* HomePage.css */
+.homepage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Full-screen height */
+    background-image: url('https://img.freepik.com/free-photo/standard-quality-control-concept-m_23-2150041854.jpg?t=st=1741245989~exp=1741249589~hmac=39a21ffc8468ff634d486e39fc9f4918a4eef0b5fa3de2ab2f3803e2aa2bc32b&w=1380'); /* Replace with your image URL */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white; /* Text color */
+    text-align: center;
+  }
+  
+  .homepage h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .homepage button {
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.3s ease-in-out;
+    border-radius: 5px;
+  }
+  
+  .homepage button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .swal-confirm-btn {
+    background-color: #007bff !important; /* Blue color */
+    color: white !important; /* White text */
+    border: none !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    border-radius: 5px !important;
+  }
